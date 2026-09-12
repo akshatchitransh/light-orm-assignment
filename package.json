@@ -1,0 +1,29 @@
+{
+  "name": "light-orm-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lightweight TypeScript ORM for Serverless SQL Databases with Todo Showcase",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspace=@light-orm/core",
+    "dev:orm": "npm run dev --workspace=@light-orm/core",
+    "dev:todo": "npm run dev --workspace=todo-app",
+    "dev": "npm run dev --workspace=todo-app",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "keywords": [
+    "typescript",
+    "orm",
+    "serverless",
+    "sql",
+    "postgres",
+    "neon",
+    "supabase"
+  ],
+  "author": "LightORM Team",
+  "license": "MIT"
+}
