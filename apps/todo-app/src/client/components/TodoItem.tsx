@@ -60,19 +60,28 @@ export const TodoItem: React.FC<TodoItemProps> = ({
             autoFocus
           />
         ) : (
-          <span
-            className={`task-label ${todo.completed ? "done" : ""}`}
-            onClick={() => onToggle(todo.id, !todo.completed)}
-            onDoubleClick={() => setIsEditing(true)}
-            title="Click to toggle, double-click to edit"
-          >
-            {todo.title}
-          </span>
+          <div className="task-title-row">
+            <span
+              className={`task-label ${todo.completed ? "done" : ""}`}
+              onClick={() => onToggle(todo.id, !todo.completed)}
+              onDoubleClick={() => setIsEditing(true)}
+              title="Click to toggle, double-click to edit"
+            >
+              {todo.title}
+            </span>
+            <button
+              type="button"
+              className="btn-edit-link"
+              onClick={() => setIsEditing(true)}
+            >
+              Edit
+            </button>
+          </div>
         )}
 
         <div className="task-badges-row">
           <span className={`badge-pill priority-${priorityKey}`}>
-            {priorityKey.charAt(0).toUpperCase() + priorityKey.slice(1)}
+            {priorityKey}
           </span>
 
           {todo.category && (

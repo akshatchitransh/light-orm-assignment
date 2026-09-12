@@ -4,7 +4,6 @@ import { StatsBar } from "./components/StatsBar.js";
 import { AddTodoForm } from "./components/AddTodoForm.js";
 import { FilterBar } from "./components/FilterBar.js";
 import { TodoItem } from "./components/TodoItem.js";
-import { FocusSnapshot } from "./components/FocusSnapshot.js";
 import { SqlInspector } from "./components/SqlInspector.js";
 import { CheckCircle2, Clock, Sparkles, Zap } from "lucide-react";
 import { TodoItem as TodoType, QueryTelemetryItem } from "../server/db.js";
@@ -202,7 +201,6 @@ export const App: React.FC = () => {
     }
   };
 
-  // Determine dynamic greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
@@ -219,7 +217,7 @@ export const App: React.FC = () => {
         isLoading={isLoading}
       />
 
-      {/* Hero Greeting Section */}
+      {/* Hero Greeting Section with Beautiful 3D Neon Database Image */}
       <section className="hero-section">
         <div className="greeting-card">
           <div className="tag-pill">
@@ -234,15 +232,16 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="focus-artwork-card">
+        {/* Replaced 3 green bars with stunning 3D Neon Cloud Database Artwork */}
+        <div className="hero-artwork-card">
           <img
-            src="/focus-mode.jpg"
-            alt="3D Focus Artwork"
-            className="focus-artwork-img"
+            src="/hero-db-art.jpg"
+            alt="Neon Serverless PostgreSQL Database"
+            className="hero-artwork-img"
           />
-          <div className="focus-artwork-badge">
-            <Zap size={11} fill="white" />
-            <span>Focus mode</span>
+          <div className="hero-artwork-badge">
+            <Zap size={11} fill="#34d399" />
+            <span>Neon Serverless Postgres</span>
           </div>
         </div>
       </section>
@@ -254,12 +253,13 @@ export const App: React.FC = () => {
         active={stats.active}
       />
 
-      {/* Main 2-Column Grid */}
+      {/* Main 2-Column Workspace Grid: Left Form (320px) | Right Feed (1fr) */}
       <div className="workspace-grid">
-        {/* Left Column: Form, Filters, Tasks */}
-        <div className="left-feed">
-          <AddTodoForm onAdd={handleAddTodo} isLoading={isLoading} />
+        {/* Left Column: New Task Card */}
+        <AddTodoForm onAdd={handleAddTodo} isLoading={isLoading} />
 
+        {/* Right Column: Filter Bar & Today's Tasks */}
+        <div className="right-workspace-feed">
           <FilterBar
             status={statusFilter}
             onStatusChange={setStatusFilter}
@@ -277,9 +277,9 @@ export const App: React.FC = () => {
 
             {todos.length === 0 ? (
               <div className="clean-card" style={{ textAlign: "center", padding: "2.5rem 1.5rem", color: "var(--text-sub)" }}>
-                <Sparkles size={24} style={{ margin: "0 auto 0.5rem auto", color: "var(--purple-primary)" }} />
+                <Sparkles size={24} style={{ margin: "0 auto 0.5rem auto", color: "var(--brand-primary)" }} />
                 <p style={{ fontWeight: 600, color: "var(--text-main)", marginBottom: "0.25rem" }}>No tasks to show</p>
-                <p style={{ fontSize: "0.85rem" }}>Click "+ Add Task" or "Seed Demo" above to create your tasks.</p>
+                <p style={{ fontSize: "0.85rem" }}>Click "+ Add Task" or "Seed Demo" to populate your tasks.</p>
               </div>
             ) : (
               <div className="tasks-list">
@@ -296,18 +296,10 @@ export const App: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* Right Column: Focus Snapshot & SQL Inspector */}
-        <div className="right-sidebar">
-          <FocusSnapshot
-            total={stats.total}
-            completed={stats.completed}
-            active={stats.active}
-          />
-
-          <SqlInspector queries={queries} />
-        </div>
       </div>
+
+      {/* Bottom Full-Width SQL Inspector */}
+      <SqlInspector queries={queries} />
 
       {/* Floating Toast Notification */}
       {toastMessage && (

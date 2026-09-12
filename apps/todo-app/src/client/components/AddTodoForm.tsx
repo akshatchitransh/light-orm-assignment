@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus, Plus } from "lucide-react";
 
 interface AddTodoFormProps {
   onAdd: (data: {
@@ -45,37 +45,49 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) =>
           disabled={isLoading}
         />
 
-        <div className="form-row">
-          <div>
-            <div className="field-label">Priority</div>
-            <div className="segmented-priority">
-              {(["low", "medium", "high"] as const).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  className={`seg-btn ${priority === p ? "active" : ""}`}
-                  onClick={() => setPriority(p)}
-                >
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="field-label">Category</div>
-            <select
-              className="select-box"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+        <div>
+          <div className="field-label">Priority</div>
+          <div className="segmented-priority">
+            <button
+              type="button"
+              className={`seg-btn ${priority === "low" ? "active" : ""}`}
+              onClick={() => setPriority("low")}
             >
-              <option value="Engineering">Engineering</option>
-              <option value="Product">Product</option>
-              <option value="DevOps">DevOps</option>
-              <option value="Design">Design</option>
-              <option value="General">General</option>
-            </select>
+              <ArrowDown size={12} />
+              <span>Low</span>
+            </button>
+            <button
+              type="button"
+              className={`seg-btn ${priority === "medium" ? "active" : ""}`}
+              onClick={() => setPriority("medium")}
+            >
+              <Minus size={12} />
+              <span>Medium</span>
+            </button>
+            <button
+              type="button"
+              className={`seg-btn ${priority === "high" ? "active" : ""}`}
+              onClick={() => setPriority("high")}
+            >
+              <ArrowUp size={12} />
+              <span>High</span>
+            </button>
           </div>
+        </div>
+
+        <div>
+          <div className="field-label">Category</div>
+          <select
+            className="select-box"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="Engineering">Engineering</option>
+            <option value="Product">Product</option>
+            <option value="DevOps">DevOps</option>
+            <option value="Design">Design</option>
+            <option value="General">General</option>
+          </select>
         </div>
 
         <div>
@@ -95,7 +107,7 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) =>
 
         <button
           type="submit"
-          className="btn-add-purple"
+          className="btn-add-teal"
           disabled={!title.trim() || isLoading}
         >
           <Plus size={16} strokeWidth={2.5} />
