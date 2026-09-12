@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { db, queryLogBuffer, seedDemoData, TodoItem } from "./db.js";
-import type { WhereClause } from "@light-orm/core";
+import type { WhereClause } from "../../../../packages/orm/src/index.js";
 
 export const apiRouter = Router();
 

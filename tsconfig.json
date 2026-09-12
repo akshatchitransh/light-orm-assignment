@@ -5,7 +5,11 @@
     "moduleResolution": "bundler",
     "module": "ESNext",
     "target": "ES2022",
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@light-orm/core": ["./packages/orm/src/index.ts"]
+    }
   },
-  "include": ["api/**/*", "examples/**/*"]
+  "include": ["api/**/*", "serverless/**/*", "examples/**/*"]
 }
