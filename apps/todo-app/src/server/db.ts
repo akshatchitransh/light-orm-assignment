@@ -40,13 +40,14 @@ export interface QueryTelemetryItem extends QueryEvent {
 
 export const queryLogBuffer: QueryTelemetryItem[] = [];
 
+const DEFAULT_DATABASE_URL = "postgresql://neondb_owner:npg_jl8HOInRT9rU@ep-wild-cell-aeagzyae-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+
 /**
  * 2. Initialize the ORM Database Client
- * Automatically connects to DATABASE_URL (Neon / Supabase / Postgres)
- * or falls back to the high-fidelity in-memory Postgres emulator for instant zero-config evaluation!
+ * Automatically connects to DATABASE_URL or defaults to the configured Neon Serverless Postgres pooler
  */
 export const db = createClient({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL || DEFAULT_DATABASE_URL,
   schema: {
     todo: TodoModel,
   },

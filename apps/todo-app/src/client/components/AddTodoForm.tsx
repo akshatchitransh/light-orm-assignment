@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowDown, ArrowUp, Minus, Plus } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, Minus, Plus } from "lucide-react";
 
 interface AddTodoFormProps {
   onAdd: (data: {
@@ -11,24 +11,30 @@ interface AddTodoFormProps {
   isLoading: boolean;
 }
 
-export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) => {
+export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd }) => {
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [category, setCategory] = useState("Engineering");
   const [dateOption, setDateOption] = useState("Today");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || isLoading) return;
+    const cleanTitle = title.trim();
+    if (!cleanTitle || isSubmitting) return;
 
-    await onAdd({
-      title: title.trim(),
-      priority,
-      category,
-      dueDate: dateOption,
-    });
-
-    setTitle("");
+    setIsSubmitting(true);
+    try {
+      await onAdd({
+        title: cleanTitle,
+        priority,
+        category,
+        dueDate: dateOption,
+      });
+      setTitle("");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -42,7 +48,7 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) =>
           placeholder="What needs to get done?"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
 
         <div>
@@ -108,10 +114,14 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) =>
         <button
           type="submit"
           className="btn-add-teal"
-          disabled={!title.trim() || isLoading}
+          disabled={!title.trim() || isSubmitting}
         >
-          <Plus size={16} strokeWidth={2.5} />
-          <span>Add Task</span>
+          {isSubmitting ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <Plus size={16} strokeWidth={2.5} />
+          )}
+          <span>{isSubmitting ? "Adding task..." : "Add Task"}</span>
         </button>
       </form>
     </div>
