@@ -383,7 +383,7 @@ export const App: React.FC = () => {
       </div>
 
       {/* Bottom Full-Width SQL Inspector */}
-      <SqlInspector queries={queries} />
+      <SqlInspector queries={queries} onRefreshTasks={fetchTodos} />
 
       {/* Floating Toast Notification */}
       {toastMessage && (

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowDown, ArrowUp, Loader2, Minus, Plus } from "lucide-react";
+import { ArrowDown, ArrowUp, Calendar, Loader2, Minus, Plus } from "lucide-react";
 
 interface AddTodoFormProps {
   onAdd: (data: {
@@ -15,8 +15,46 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd }) => {
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [category, setCategory] = useState("Engineering");
-  const [dateOption, setDateOption] = useState("Today");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Default to today's date formatted as YYYY-MM-DD for native input
+  const getTodayStr = () => new Date().toISOString().split("T")[0];
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayStr());
+  const [activePreset, setActivePreset] = useState<string>("today");
+
+  const formatDisplayDate = (isoStr: string) => {
+    if (!isoStr) return "No date";
+    const today = getTodayStr();
+    if (isoStr === today) return "Today";
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+    if (isoStr === tomorrowStr) return "Tomorrow";
+
+    try {
+      const d = new Date(isoStr + "T00:00:00");
+      return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    } catch {
+      return isoStr;
+    }
+  };
+
+  const handleSetPreset = (preset: "today" | "tomorrow" | "next-week") => {
+    setActivePreset(preset);
+    const d = new Date();
+    if (preset === "tomorrow") {
+      d.setDate(d.getDate() + 1);
+    } else if (preset === "next-week") {
+      d.setDate(d.getDate() + 7);
+    }
+    setSelectedDate(d.toISOString().split("T")[0]);
+  };
+
+  const handleCustomDateChange = (val: string) => {
+    setSelectedDate(val);
+    setActivePreset("custom");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +63,12 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd }) => {
 
     setIsSubmitting(true);
     try {
+      const displayDueDate = formatDisplayDate(selectedDate);
       await onAdd({
         title: cleanTitle,
         priority,
         category,
-        dueDate: dateOption,
+        dueDate: displayDueDate,
       });
       setTitle("");
     } finally {
@@ -96,19 +135,51 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd }) => {
           </select>
         </div>
 
+        {/* Interactive Calendar Date Picker */}
         <div>
-          <div className="field-label">Date</div>
-          <select
-            className="select-box"
-            value={dateOption}
-            onChange={(e) => setDateOption(e.target.value)}
-          >
-            <option value="Today">Today</option>
-            <option value="Tomorrow">Tomorrow</option>
-            <option value="Fri, Mar 15">Fri, Mar 15</option>
-            <option value="Mon, Mar 18">Mon, Mar 18</option>
-            <option value="Next Week">Next Week</option>
-          </select>
+          <div className="field-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Due Date</span>
+            <span style={{ fontSize: "0.72rem", color: "var(--brand-primary)", fontWeight: 700 }}>
+              {formatDisplayDate(selectedDate)}
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+            <div className="calendar-input-wrapper">
+              <Calendar size={14} className="calendar-icon" />
+              <input
+                type="date"
+                className="calendar-date-input"
+                value={selectedDate}
+                onChange={(e) => handleCustomDateChange(e.target.value)}
+                title="Select due date from calendar"
+              />
+            </div>
+
+            <div className="date-presets-bar">
+              <button
+                type="button"
+                className={`date-preset-chip ${activePreset === "today" ? "active" : ""}`}
+                onClick={() => handleSetPreset("today")}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                className={`date-preset-chip ${activePreset === "tomorrow" ? "active" : ""}`}
+                onClick={() => handleSetPreset("tomorrow")}
+              >
+                Tomorrow
+              </button>
+              <button
+                type="button"
+                className={`date-preset-chip ${activePreset === "next-week" ? "active" : ""}`}
+                onClick={() => handleSetPreset("next-week")}
+              >
+                Next Week
+              </button>
+            </div>
+          </div>
         </div>
 
         <button

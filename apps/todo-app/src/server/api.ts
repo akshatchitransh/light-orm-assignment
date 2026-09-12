@@ -175,3 +175,44 @@ apiRouter.get("/stats", async (_req: Request, res: Response) => {
 apiRouter.get("/telemetry/queries", (_req: Request, res: Response) => {
   res.json({ success: true, queries: queryLogBuffer });
 });
+
+/**
+ * POST /api/raw-query
+ * Execute custom SQL (e.g. INSERT INTO ...) directly from SQL Inspector console
+ */
+apiRouter.post("/raw-query", async (req: Request, res: Response): Promise<void> => {
+  const start = performance.now();
+  try {
+    const { sql, params } = req.body;
+    if (!sql || typeof sql !== "string") {
+      res.status(400).json({ success: false, error: "SQL string is required" });
+      return;
+    }
+
+    const boundParams = Array.isArray(params) ? params : [];
+    const result = await db.driver.query(sql, boundParams);
+    const duration = performance.now() - start;
+
+    // Push into telemetry buffer
+    queryLogBuffer.unshift({
+      id: Math.random().toString(36).substring(2, 9),
+      sql,
+      params: boundParams,
+      durationMs: duration,
+      timestamp: new Date().toISOString(),
+      rowCount: result.rowCount,
+      source: db.driver.driverName,
+    });
+    if (queryLogBuffer.length > 50) queryLogBuffer.pop();
+
+    res.json({
+      success: true,
+      rowCount: result.rowCount,
+      rows: result.rows,
+      durationMs: duration,
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
