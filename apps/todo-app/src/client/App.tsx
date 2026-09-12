@@ -199,23 +199,31 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleUpdateTitle = async (id: number, title: string) => {
-    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, title } : t)));
+  const handleUpdateTask = async (
+    id: number,
+    data: { title?: string; priority?: string; category?: string; dueDate?: string }
+  ) => {
+    // 1. Instant optimistic UI update
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, ...data } : t))
+    );
+
     try {
       const res = await fetch(`/api/todos/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
+        body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (json.success) {
-        showToast("Title updated via db.todo.update()");
-        fetchTodos();
+        showToast(`Task #${id} updated via db.todo.update()`);
+        fetchStats();
+        fetchQueries();
       }
     } catch (err: any) {
-      console.error("Failed to update title:", err);
-      showToast("Failed to update title", true);
+      console.error("Failed to update task:", err);
+      showToast("Failed to update task", true);
       fetchTodos();
     }
   };
@@ -373,7 +381,7 @@ export const App: React.FC = () => {
                     todo={todo}
                     onToggle={handleToggle}
                     onDelete={handleDelete}
-                    onUpdateTitle={handleUpdateTitle}
+                    onUpdate={handleUpdateTask}
                   />
                 ))}
               </div>

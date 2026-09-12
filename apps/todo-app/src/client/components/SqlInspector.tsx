@@ -128,7 +128,7 @@ export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTa
               onClick={() => setActiveTab("insert")}
             >
               <PlusCircle size={12} />
-              <span>SQL Insert Console</span>
+              <span>SQL Playground (INSERT & UPDATE)</span>
             </button>
           </div>
 
@@ -165,13 +165,25 @@ export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTa
               ))}
             </div>
           ) : (
-            /* Tab 2: SQL Insert Console */
+            /* Tab 2: SQL Playground Console */
             <div className="sql-console-box">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
                 <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 600 }}>
                   Execute SQL statement directly against Neon PostgreSQL:
                 </span>
-                <div style={{ display: "flex", gap: "0.4rem" }}>
+                <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    className="sql-preset-btn"
+                    onClick={() =>
+                      setCustomSql(
+                        `UPDATE "todos" SET "priority" = 'high', "title" = 'Optimized with Neon connection pooling' WHERE "completed" = false RETURNING *;`
+                      )
+                    }
+                  >
+                    <Sparkles size={11} color="#34d399" />
+                    <span>Template: UPDATE Task</span>
+                  </button>
                   <button
                     type="button"
                     className="sql-preset-btn"
@@ -182,19 +194,19 @@ export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTa
                     }
                   >
                     <Sparkles size={11} />
-                    <span>Template: Architecture</span>
+                    <span>Template: INSERT Task</span>
                   </button>
                   <button
                     type="button"
                     className="sql-preset-btn"
                     onClick={() =>
                       setCustomSql(
-                        `INSERT INTO "todos" ("title", "priority", "category", "dueDate") VALUES ('Deploy staging release to Neon', 'medium', 'DevOps', 'Next Week') RETURNING *;`
+                        `UPDATE "todos" SET "completed" = true WHERE "priority" = 'high' RETURNING *;`
                       )
                     }
                   >
                     <Sparkles size={11} />
-                    <span>Template: DevOps</span>
+                    <span>Template: Mark High Done</span>
                   </button>
                 </div>
               </div>
