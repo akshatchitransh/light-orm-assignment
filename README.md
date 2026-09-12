@@ -2,6 +2,14 @@
 
 > A lightweight, zero-code-generation, fully type-safe TypeScript ORM built specifically for serverless PostgreSQL databases (Neon, Supabase, AWS Aurora, local Postgres) with a modern showcase Todo application.
 
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![Vitest](https://img.shields.io/badge/Tests-22%2F22%20Passing-success.svg)](https://vitest.dev/)
+[![Database](https://img.shields.io/badge/Database-Neon%20Postgres-00e599.svg)](https://neon.tech)
+[![Deployment](https://img.shields.io/badge/Vercel-Deployed-black.svg)](https://vercel.com)
+
+- **GitHub Repository**: [https://github.com/akshatchitransh/light-orm-assignment](https://github.com/akshatchitransh/light-orm-assignment)
+- **Live Deployed Application**: Your live Vercel deployment link (e.g. `https://light-orm-assignment.vercel.app`)
+
 ---
 
 ## Table of Contents
@@ -9,6 +17,7 @@
 - [Monorepo Architecture](#monorepo-architecture)
 - [Quick Start](#quick-start)
 - [Database Configuration](#database-configuration)
+- [Publishing to npm](#publishing-to-npm)
 - [ORM Developer Experience & API Guide](#orm-developer-experience--api-guide)
   - [1. Fluent Schema Definition](#1-fluent-schema-definition)
   - [2. Zero-Codegen Type Inference](#2-zero-codegen-type-inference)
@@ -130,7 +139,25 @@ DATABASE_URL="postgresql://postgres.xxx:password@aws-0-us-east-1.pooler.supabase
 DATABASE_URL="postgres://postgres:postgres@localhost:5432/todo_db"
 ```
 
-When `DATABASE_URL` is set, `createClient` instantiates `PostgresDriver` with automatic SSL negotiation and connection pooling.
+---
+
+## Publishing to npm
+
+The ORM package (`packages/orm`) is pre-configured with multi-format bundling (CommonJS, ESM, and TypeScript `.d.ts` type declarations).
+
+To publish the package to the public npm registry under your own namespace:
+
+```bash
+# 1. Build the package bundle
+npm run build --workspace=@light-orm/core
+
+# 2. Log in to your npm account
+npm login
+
+# 3. Publish to npm (e.g. @akshatchitransh/light-orm or @light-orm/core)
+cd packages/orm
+npm publish --access public
+```
 
 ---
 
