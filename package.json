@@ -9,13 +9,25 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present && node -e \"fs.cpSync('apps/todo-app/dist', 'dist', { recursive: true })\"",
+    "build:api": "tsup serverless/index.ts --format esm --out-dir api --clean --external express --external cors --external pg && node -e \"const fs = require('fs'); fs.writeFileSync('api/[...path].js', 'export { default } from \\\"./index.js\\\";\\n')\"",
+    "build": "npm run build --workspaces --if-present && npm run build:api && node -e \"fs.cpSync('apps/todo-app/dist', 'dist', { recursive: true })\"",
     "test": "npm run test --workspace=@light-orm/core",
     "test:orm": "npx tsx examples/quickstart.ts",
     "dev:orm": "npm run dev --workspace=@light-orm/core",
     "dev:todo": "npm run dev --workspace=todo-app",
     "dev": "npm run dev --workspace=todo-app",
     "lint": "npm run lint --workspaces --if-present"
+  },
+  "dependencies": {
+    "@light-orm/core": "*",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   },
   "keywords": [
     "typescript",

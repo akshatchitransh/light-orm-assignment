@@ -5,9 +5,8 @@ import {
   number,
   boolean,
   timestamp,
-  InferModel,
-  QueryEvent,
 } from "@light-orm/core";
+import type { InferModel, QueryEvent } from "@light-orm/core";
 
 // Auto-load .env file in Node.js
 try {

@@ -4,6 +4,7 @@ import cors from "cors";
 try {
   process.loadEnvFile?.();
 } catch {}
+
 import { apiRouter } from "../apps/todo-app/src/server/api.js";
 import { initDb } from "../apps/todo-app/src/server/db.js";
 
@@ -32,11 +33,13 @@ app.use(async (_req, _res, next) => {
   next();
 });
 
-// Normalize request path so that both /api/todos and /todos match
+// Resilient path normalization for Vercel edge rewrite / sub-routing
 app.use((req, _res, next) => {
   const matchedPath = (req.headers["x-matched-path"] as string) || "";
-  if (matchedPath && matchedPath.startsWith("/api/")) {
-    req.url = matchedPath.replace(/^\/api/, "") || "/";
+  if (matchedPath && req.url === "/") {
+    const queryIndex = req.originalUrl?.indexOf("?") ?? -1;
+    const queryString = queryIndex !== -1 ? req.originalUrl.slice(queryIndex) : "";
+    req.url = matchedPath + queryString;
   }
   next();
 });
@@ -50,4 +53,5 @@ app.get("/health", (_req, res) => {
   res.json({ status: "healthy", serverless: true, timestamp: new Date().toISOString() });
 });
 
+export { app };
 export default app;

@@ -32,7 +32,7 @@ export {
 } from "./errors.js";
 
 // Types
-export {
+export type {
   ColumnDataType,
   ColumnOptions,
   ColumnBuilder,
