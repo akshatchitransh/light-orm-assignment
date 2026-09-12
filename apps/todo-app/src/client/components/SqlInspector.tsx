@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, ChevronDown, ChevronUp, Copy, Play, PlusCircle, Sparkles, Terminal } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Copy, Play, Sparkles, Terminal } from "lucide-react";
 import { QueryTelemetryItem } from "../../server/db.js";
 
 interface SqlInspectorProps {
@@ -9,10 +9,10 @@ interface SqlInspectorProps {
 
 export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTasks }) => {
   const [isOpen, setIsOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<"logs" | "insert">("logs");
+  const [activeTab, setActiveTab] = useState<"query" | "logs">("query");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Insert Console State
+  // Live Query Console State
   const defaultInsertQuery = `INSERT INTO "todos" ("title", "priority", "category", "dueDate") VALUES ('Direct SQL Insert via @light-orm/core', 'high', 'Engineering', 'Today') RETURNING *;`;
   const [customSql, setCustomSql] = useState(defaultInsertQuery);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -112,60 +112,28 @@ export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTa
 
       {isOpen && (
         <>
-          {/* Tabs: Live Logs vs Interactive Insert Console */}
+          {/* Tabs: Live Query FIRST (most visible), Live Query Logs SECOND */}
           <div className="sql-tabs-bar">
+            <button
+              type="button"
+              className={`sql-tab-btn ${activeTab === "query" ? "active" : ""}`}
+              onClick={() => setActiveTab("query")}
+            >
+              <Play size={12} fill={activeTab === "query" ? "#34d399" : "none"} />
+              <span>Live Query (INSERT & UPDATE)</span>
+            </button>
             <button
               type="button"
               className={`sql-tab-btn ${activeTab === "logs" ? "active" : ""}`}
               onClick={() => setActiveTab("logs")}
             >
               <Terminal size={12} />
-              <span>Live Query Logs</span>
-            </button>
-            <button
-              type="button"
-              className={`sql-tab-btn ${activeTab === "insert" ? "active" : ""}`}
-              onClick={() => setActiveTab("insert")}
-            >
-              <PlusCircle size={12} />
-              <span>SQL Playground (INSERT & UPDATE)</span>
+              <span>Live Query Logs ({queries.length})</span>
             </button>
           </div>
 
-          {activeTab === "logs" ? (
-            /* Tab 1: Live Query Cards */
-            <div className="sql-horizontal-grid">
-              {displayQueries.map((q) => (
-                <div key={q.id} className="sql-card-col">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
-                    <span className="sql-text">{q.sql}</span>
-                    <button
-                      className="btn-trash"
-                      style={{ color: "#94a3b8", padding: "0.1rem" }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopy(q.id, q.sql);
-                      }}
-                      title="Copy SQL"
-                      aria-label="Copy SQL"
-                    >
-                      {copiedId === q.id ? <Check size={11} color="#34d399" /> : <Copy size={11} />}
-                    </button>
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "0.25rem" }}>
-                    <span className="sql-timing-tag">{q.durationMs.toFixed(1)} ms</span>
-                    {q.params && q.params.length > 0 && (
-                      <span style={{ fontSize: "0.68rem", color: "#34d399" }}>
-                        [{q.params.join(", ")}]
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            /* Tab 2: SQL Playground Console */
+          {activeTab === "query" ? (
+            /* Tab 1: Live Query Console (FIRST - Directly visible!) */
             <div className="sql-console-box">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
                 <span style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 600 }}>
@@ -216,7 +184,7 @@ export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTa
                 rows={3}
                 value={customSql}
                 onChange={(e) => setCustomSql(e.target.value)}
-                placeholder="Enter SQL INSERT or SELECT query..."
+                placeholder="Enter SQL INSERT or UPDATE query..."
               />
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -227,7 +195,7 @@ export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTa
                   disabled={isExecuting || !customSql.trim()}
                 >
                   <Play size={13} fill="white" />
-                  <span>{isExecuting ? "Executing..." : "Execute SQL Insert"}</span>
+                  <span>{isExecuting ? "Executing..." : "Execute Live Query"}</span>
                 </button>
 
                 {executionResult && (
@@ -242,6 +210,38 @@ export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries, onRefreshTa
                   </span>
                 )}
               </div>
+            </div>
+          ) : (
+            /* Tab 2: Live Query Logs (SECOND) */
+            <div className="sql-horizontal-grid">
+              {displayQueries.map((q) => (
+                <div key={q.id} className="sql-card-col">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                    <span className="sql-text">{q.sql}</span>
+                    <button
+                      className="btn-trash"
+                      style={{ color: "#94a3b8", padding: "0.1rem" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopy(q.id, q.sql);
+                      }}
+                      title="Copy SQL"
+                      aria-label="Copy SQL"
+                    >
+                      {copiedId === q.id ? <Check size={11} color="#34d399" /> : <Copy size={11} />}
+                    </button>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "0.25rem" }}>
+                    <span className="sql-timing-tag">{q.durationMs.toFixed(1)} ms</span>
+                    {q.params && q.params.length > 0 && (
+                      <span style={{ fontSize: "0.68rem", color: "#34d399" }}>
+                        [{q.params.join(", ")}]
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
