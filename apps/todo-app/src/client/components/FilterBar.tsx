@@ -1,5 +1,5 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 
 interface FilterBarProps {
   status: "all" | "active" | "completed";
@@ -25,13 +25,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           className={`tab-btn ${status === "all" ? "active" : ""}`}
           onClick={() => onStatusChange("all")}
         >
-          All
+          All Tasks
         </button>
         <button
           className={`tab-btn ${status === "active" ? "active" : ""}`}
           onClick={() => onStatusChange("active")}
         >
-          Active
+          In Progress
         </button>
         <button
           className={`tab-btn ${status === "completed" ? "active" : ""}`}
@@ -42,20 +42,23 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </div>
 
       <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flex: 1, justifyContent: "flex-end" }}>
-        <select
-          className="input-text"
-          style={{ width: "auto", padding: "0.45rem 0.8rem", fontSize: "0.825rem" }}
-          value={priority}
-          onChange={(e) => onPriorityChange(e.target.value)}
-        >
-          <option value="all">All Priorities</option>
-          <option value="high">High Priority</option>
-          <option value="medium">Medium Priority</option>
-          <option value="low">Low Priority</option>
-        </select>
+        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          <Filter size={13} style={{ position: "absolute", left: "0.65rem", color: "var(--text-muted)", pointerEvents: "none" }} />
+          <select
+            className="input-text"
+            style={{ width: "auto", padding: "0.45rem 0.8rem 0.45rem 1.8rem", fontSize: "0.825rem" }}
+            value={priority}
+            onChange={(e) => onPriorityChange(e.target.value)}
+          >
+            <option value="all">All Priorities</option>
+            <option value="high">High Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="low">Low Priority</option>
+          </select>
+        </div>
 
         <div className="search-box">
-          <Search size={15} className="search-icon" />
+          <Search size={14} className="search-icon" />
           <input
             type="text"
             className="search-input"

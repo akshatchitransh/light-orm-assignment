@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Flame, Plus, Sparkles, Tag, Zap } from "lucide-react";
 
 interface AddTodoFormProps {
   onAdd: (data: { title: string; priority: string; category: string; dueDate?: string }) => Promise<void>;
@@ -32,7 +32,7 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) =>
         <input
           type="text"
           className="input-text"
-          placeholder="What needs to be done? (e.g. Write comprehensive ORM documentation)"
+          placeholder="Create a new task via @light-orm/core... (e.g. Implement schema introspection CLI)"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={isLoading}
@@ -50,50 +50,56 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) =>
 
       <div className="add-options-row">
         <div className="priority-selector">
-          <span className="priority-label">Priority:</span>
           <button
             type="button"
             className={`priority-btn priority-low ${priority === "low" ? "active" : ""}`}
             onClick={() => setPriority("low")}
           >
-            Low
+            <Sparkles size={12} />
+            <span>Low</span>
           </button>
           <button
             type="button"
             className={`priority-btn priority-medium ${priority === "medium" ? "active" : ""}`}
             onClick={() => setPriority("medium")}
           >
-            Medium
+            <Zap size={12} />
+            <span>Medium</span>
           </button>
           <button
             type="button"
             className={`priority-btn priority-high ${priority === "high" ? "active" : ""}`}
             onClick={() => setPriority("high")}
           >
-            High
+            <Flame size={12} />
+            <span>High</span>
           </button>
         </div>
 
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <select
-            className="input-text"
-            style={{ padding: "0.35rem 0.75rem", fontSize: "0.8rem", width: "auto" }}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="General">General</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Work">Work</option>
-            <option value="DevOps">DevOps</option>
-            <option value="Personal">Personal</option>
-          </select>
+        <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+            <Tag size={13} style={{ position: "absolute", left: "0.65rem", color: "var(--text-muted)", pointerEvents: "none" }} />
+            <select
+              className="input-text"
+              style={{ padding: "0.4rem 0.8rem 0.4rem 1.9rem", fontSize: "0.8rem", width: "auto" }}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="General">General</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Architecture">Architecture</option>
+              <option value="DevOps">DevOps</option>
+              <option value="Product">Product</option>
+            </select>
+          </div>
 
           <input
             type="date"
             className="input-text"
-            style={{ padding: "0.35rem 0.75rem", fontSize: "0.8rem", width: "auto" }}
+            style={{ padding: "0.4rem 0.75rem", fontSize: "0.8rem", width: "auto" }}
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
+            title="Optional due date"
           />
         </div>
       </div>

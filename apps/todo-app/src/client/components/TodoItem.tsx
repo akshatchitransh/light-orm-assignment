@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Calendar, Check, Edit2, Tag, Trash2, X } from "lucide-react";
+import { Calendar, Check, Edit2, Flame, Sparkles, Tag, Trash2, X, Zap } from "lucide-react";
 import { TodoItem as TodoType } from "../../server/db.js";
 
 interface TodoItemProps {
@@ -34,19 +34,35 @@ export const TodoItem: React.FC<TodoItemProps> = ({
     }
   };
 
-  const getPriorityClass = (p: string) => {
-    switch (p.toLowerCase()) {
-      case "high":
-        return "pill-high";
-      case "low":
-        return "pill-low";
-      default:
-        return "pill-medium";
+  const priorityKey = (todo.priority || "medium").toLowerCase();
+
+  const renderPriorityBadge = () => {
+    if (priorityKey === "high") {
+      return (
+        <span className="pill-badge pill-high">
+          <Flame size={11} />
+          <span>High</span>
+        </span>
+      );
     }
+    if (priorityKey === "low") {
+      return (
+        <span className="pill-badge pill-low">
+          <Sparkles size={11} />
+          <span>Low</span>
+        </span>
+      );
+    }
+    return (
+      <span className="pill-badge pill-medium">
+        <Zap size={11} />
+        <span>Medium</span>
+      </span>
+    );
   };
 
   return (
-    <div className={`todo-item ${todo.completed ? "completed" : ""}`}>
+    <div className={`todo-item priority-${priorityKey} ${todo.completed ? "completed" : ""}`}>
       <div className="todo-left">
         <button
           type="button"
@@ -54,23 +70,23 @@ export const TodoItem: React.FC<TodoItemProps> = ({
           onClick={() => onToggle(todo.id, !todo.completed)}
           aria-label={todo.completed ? "Mark incomplete" : "Mark completed"}
         >
-          {todo.completed && <Check size={14} color="white" strokeWidth={3} />}
+          {todo.completed && <Check size={14} color="white" strokeWidth={3.5} />}
         </button>
 
         <div className="todo-content">
           {isEditing ? (
-            <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <input
                 type="text"
                 className="input-text"
-                style={{ padding: "0.25rem 0.5rem", fontSize: "0.95rem" }}
+                style={{ padding: "0.35rem 0.75rem", fontSize: "0.95rem" }}
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
                 autoFocus
               />
-              <button className="icon-btn" onClick={handleSaveTitle}>
-                <Check size={15} color="#34d399" />
+              <button className="icon-btn" onClick={handleSaveTitle} title="Save changes">
+                <Check size={16} color="#34d399" />
               </button>
               <button
                 className="icon-btn"
@@ -78,37 +94,41 @@ export const TodoItem: React.FC<TodoItemProps> = ({
                   setEditTitle(todo.title);
                   setIsEditing(false);
                 }}
+                title="Cancel"
               >
-                <X size={15} color="#ef4444" />
+                <X size={16} color="#ef4444" />
               </button>
             </div>
           ) : (
             <span
               className={`todo-title ${todo.completed ? "completed" : ""}`}
               onDoubleClick={() => setIsEditing(true)}
+              title="Double click to edit"
             >
               {todo.title}
             </span>
           )}
 
           <div className="todo-meta">
-            <span className={`pill-badge ${getPriorityClass(todo.priority)}`}>
-              {todo.priority}
-            </span>
+            {renderPriorityBadge()}
 
             {todo.category && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
-                <Tag size={12} />
+              <span className="meta-chip">
+                <Tag size={11} />
                 <span>{todo.category}</span>
               </span>
             )}
 
             {todo.dueDate && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
-                <Calendar size={12} />
+              <span className="meta-chip">
+                <Calendar size={11} />
                 <span>{todo.dueDate}</span>
               </span>
             )}
+
+            <span style={{ fontSize: "0.7rem", color: "var(--text-faint)", marginLeft: "auto" }}>
+              ID: #{todo.id}
+            </span>
           </div>
         </div>
       </div>
@@ -118,7 +138,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
           <button
             className="icon-btn"
             onClick={() => setIsEditing(true)}
-            title="Edit title"
+            title="Edit task title"
           >
             <Edit2 size={15} />
           </button>
@@ -127,7 +147,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
         <button
           className="icon-btn delete-btn"
           onClick={() => onDelete(todo.id)}
-          title="Delete task"
+          title="Delete task via ORM"
         >
           <Trash2 size={15} />
         </button>
