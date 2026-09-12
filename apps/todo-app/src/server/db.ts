@@ -9,6 +9,13 @@ import {
   QueryEvent,
 } from "@light-orm/core";
 
+// Auto-load .env file in Node.js
+try {
+  process.loadEnvFile?.();
+} catch {
+  // ignore if .env does not exist
+}
+
 /**
  * 1. Define Todo Model using @light-orm/core fluent schema definition
  */

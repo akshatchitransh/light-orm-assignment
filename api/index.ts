@@ -1,5 +1,9 @@
 import express from "express";
 import cors from "cors";
+
+try {
+  process.loadEnvFile?.();
+} catch {}
 import { apiRouter } from "../apps/todo-app/src/server/api.js";
 import { initDb } from "../apps/todo-app/src/server/db.js";
 
