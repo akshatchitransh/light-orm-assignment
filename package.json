@@ -9,7 +9,7 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present && node -e \"fs.cpSync('apps/todo-app/dist', 'dist', { recursive: true })\"",
     "test": "npm run test --workspace=@light-orm/core",
     "test:orm": "npx tsx examples/quickstart.ts",
     "dev:orm": "npm run dev --workspace=@light-orm/core",
