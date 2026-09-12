@@ -1429,7 +1429,14 @@ app.use("/", apiRouter);
 app.get("/health", (_req, res) => {
   res.json({ status: "healthy", serverless: true, timestamp: (/* @__PURE__ */ new Date()).toISOString() });
 });
-var index_default = app;
+var index_default = (req, res) => {
+  return new Promise((resolve, reject) => {
+    res.on("finish", resolve);
+    res.on("close", resolve);
+    res.on("error", reject);
+    app(req, res);
+  });
+};
 export {
   app,
   index_default as default

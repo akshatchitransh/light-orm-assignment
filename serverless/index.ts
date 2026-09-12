@@ -54,4 +54,11 @@ app.get("/health", (_req, res) => {
 });
 
 export { app };
-export default app;
+export default (req: any, res: any) => {
+  return new Promise((resolve, reject) => {
+    res.on("finish", resolve);
+    res.on("close", resolve);
+    res.on("error", reject);
+    app(req, res);
+  });
+};
