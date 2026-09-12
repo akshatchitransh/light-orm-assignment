@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, ChevronDown, ChevronUp, Clock, Copy, Terminal, Zap } from "lucide-react";
+import { Check, Copy, Terminal } from "lucide-react";
 import { QueryTelemetryItem } from "../../server/db.js";
 
 interface SqlInspectorProps {
@@ -7,142 +7,64 @@ interface SqlInspectorProps {
 }
 
 export const SqlInspector: React.FC<SqlInspectorProps> = ({ queries }) => {
-  const [isOpen, setIsOpen] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [filterOp, setFilterOp] = useState<string>("ALL");
 
   const handleCopy = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    setTimeout(() => setCopiedId(null), 1800);
   };
 
-  const filteredQueries = queries.filter((q) => {
-    if (filterOp === "ALL") return true;
-    return q.sql.toUpperCase().startsWith(filterOp);
-  });
-
-  const highlightSql = (sql: string) => {
-    const keywords = ["SELECT", "FROM", "WHERE", "ORDER BY", "DESC", "ASC", "LIMIT", "OFFSET", "INSERT INTO", "VALUES", "RETURNING", "UPDATE", "SET", "DELETE", "COUNT", "CREATE TABLE", "IF NOT EXISTS", "SERIAL", "PRIMARY KEY", "BOOLEAN", "VARCHAR", "TIMESTAMP", "NOT NULL", "DEFAULT"];
-    
-    // Simple colored token renderer
-    const parts = sql.split(/(\s+|,|\(|\))/g);
-    return parts.map((part, i) => {
-      const upper = part.trim().toUpperCase();
-      if (keywords.includes(upper)) {
-        return (
-          <span key={i} style={{ color: "#c084fc", fontWeight: 700 }}>
-            {part}
-          </span>
-        );
-      }
-      if (part.startsWith("$")) {
-        return (
-          <span key={i} style={{ color: "#38bdf8", fontWeight: 600 }}>
-            {part}
-          </span>
-        );
-      }
-      if (part.startsWith('"') && part.endsWith('"')) {
-        return (
-          <span key={i} style={{ color: "#e2e8f0" }}>
-            {part}
-          </span>
-        );
-      }
-      return <span key={i}>{part}</span>;
-    });
-  };
+  const displayQueries = queries.slice(0, 6);
 
   return (
-    <div className="glass-panel sql-inspector">
-      <div className="sql-header" onClick={() => setIsOpen(!isOpen)}>
-        <div className="sql-header-title">
-          <div className="mac-dots">
-            <span className="mac-dot red" />
-            <span className="mac-dot yellow" />
-            <span className="mac-dot green" />
-          </div>
-          <Terminal size={17} color="#c084fc" style={{ marginLeft: "0.25rem" }} />
-          <span>Live SQL Query Inspector</span>
-          <span className="sql-badge">{queries.length} Queries Captured</span>
+    <div className="sql-terminal-box">
+      <div className="sql-terminal-header">
+        <div className="sql-title-group">
+          <Terminal size={15} color="#c084fc" />
+          <span>SQL Inspector</span>
         </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-            {isOpen ? "Collapse Terminal" : "Expand Live SQL"}
-          </span>
-          {isOpen ? <ChevronUp size={16} color="var(--text-muted)" /> : <ChevronDown size={16} color="var(--text-muted)" />}
+        <div className="sql-active-pill">
+          <span className="sql-green-dot" />
+          <span>Live ORM activity</span>
         </div>
       </div>
 
-      {isOpen && (
-        <>
-          <div style={{ padding: "0.5rem 1.5rem", display: "flex", gap: "0.4rem", background: "rgba(10, 14, 25, 0.4)", borderBottom: "1px solid var(--border-subtle)" }}>
-            {["ALL", "INSERT", "SELECT", "UPDATE", "DELETE"].map((op) => (
-              <button
-                key={op}
-                className={`priority-btn ${filterOp === op ? "active priority-medium" : ""}`}
-                style={{ fontSize: "0.7rem", padding: "0.2rem 0.55rem" }}
-                onClick={() => setFilterOp(op)}
-              >
-                {op}
-              </button>
-            ))}
+      <div className="sql-queries-container">
+        {displayQueries.length === 0 ? (
+          <div style={{ color: "#64748b", fontSize: "0.75rem", fontStyle: "italic", padding: "0.5rem 0" }}>
+            Waiting for ORM query execution...
           </div>
-
-          <div className="sql-body">
-            {filteredQueries.length === 0 ? (
-              <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "1.5rem 0", fontSize: "0.85rem" }}>
-                Interactive Telemetry: Click anywhere on tasks (toggle, create, delete) to see real-time parameterized SQL generation!
+        ) : (
+          displayQueries.map((q) => (
+            <div key={q.id} className="sql-snippet">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+                <span className="sql-code-text">{q.sql}</span>
+                <button
+                  className="btn-trash"
+                  style={{ color: "#94a3b8", padding: "0.1rem" }}
+                  onClick={() => handleCopy(q.id, q.sql)}
+                  title="Copy SQL"
+                  aria-label="Copy SQL"
+                >
+                  {copiedId === q.id ? <Check size={11} color="#34d399" /> : <Copy size={11} />}
+                </button>
               </div>
-            ) : (
-              filteredQueries.map((q) => (
-                <div key={q.id} className="sql-log-item">
-                  <div className="sql-log-meta">
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <Zap size={12} color="#f59e0b" />
-                      <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{q.source || "postgres"}</span>
-                      <span>•</span>
-                      <span>{new Date(q.timestamp).toLocaleTimeString()}</span>
-                    </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                        <Clock size={11} />
-                        <span className="sql-timing">{q.durationMs.toFixed(1)} ms</span>
-                      </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "0.2rem" }}>
+                <span className="sql-ms-tag">{q.durationMs.toFixed(1)} ms</span>
+                {q.params && q.params.length > 0 && (
+                  <span style={{ fontSize: "0.68rem", color: "#60a5fa" }}>
+                    params: [{q.params.join(", ")}]
+                  </span>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
-                      <button
-                        className="icon-btn"
-                        style={{ width: "24px", height: "24px" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopy(q.id, q.sql);
-                        }}
-                        title="Copy SQL Query"
-                      >
-                        {copiedId === q.id ? <Check size={12} color="#34d399" /> : <Copy size={12} />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="sql-code">
-                    {highlightSql(q.sql)}
-                  </div>
-
-                  {q.params && q.params.length > 0 && (
-                    <div className="sql-params">
-                      <strong style={{ color: "#f87171", marginRight: "0.4rem" }}>parameters:</strong>
-                      [{q.params.map((p) => (typeof p === "string" ? `"${p}"` : String(p))).join(", ")}]
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </>
-      )}
+      <div className="bound-params-pill">Bound params</div>
     </div>
   );
 };

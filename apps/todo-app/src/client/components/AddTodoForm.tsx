@@ -1,16 +1,21 @@
 import React, { useState } from "react";
-import { Flame, Plus, Sparkles, Tag, Zap } from "lucide-react";
+import { Plus } from "lucide-react";
 
 interface AddTodoFormProps {
-  onAdd: (data: { title: string; priority: string; category: string; dueDate?: string }) => Promise<void>;
+  onAdd: (data: {
+    title: string;
+    priority: string;
+    category: string;
+    dueDate?: string;
+  }) => Promise<void>;
   isLoading: boolean;
 }
 
 export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) => {
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [category, setCategory] = useState("General");
-  const [dueDate, setDueDate] = useState("");
+  const [category, setCategory] = useState("Engineering");
+  const [dateOption, setDateOption] = useState("Today");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,89 +25,83 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd, isLoading }) =>
       title: title.trim(),
       priority,
       category,
-      dueDate: dueDate || undefined,
+      dueDate: dateOption,
     });
 
     setTitle("");
   };
 
   return (
-    <form className="glass-panel add-card" onSubmit={handleSubmit}>
-      <div className="add-input-row">
+    <div className="clean-card">
+      <h2 className="card-heading">New task</h2>
+
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <input
           type="text"
-          className="input-text"
-          placeholder="Create a new task via @light-orm/core... (e.g. Implement schema introspection CLI)"
+          className="task-input-box"
+          placeholder="What needs to get done?"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={isLoading}
-          autoFocus
         />
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={!title.trim() || isLoading}
-        >
-          <Plus size={18} />
-          <span>Add Task</span>
-        </button>
-      </div>
 
-      <div className="add-options-row">
-        <div className="priority-selector">
-          <button
-            type="button"
-            className={`priority-btn priority-low ${priority === "low" ? "active" : ""}`}
-            onClick={() => setPriority("low")}
-          >
-            <Sparkles size={12} />
-            <span>Low</span>
-          </button>
-          <button
-            type="button"
-            className={`priority-btn priority-medium ${priority === "medium" ? "active" : ""}`}
-            onClick={() => setPriority("medium")}
-          >
-            <Zap size={12} />
-            <span>Medium</span>
-          </button>
-          <button
-            type="button"
-            className={`priority-btn priority-high ${priority === "high" ? "active" : ""}`}
-            onClick={() => setPriority("high")}
-          >
-            <Flame size={12} />
-            <span>High</span>
-          </button>
-        </div>
+        <div className="form-row">
+          <div>
+            <div className="field-label">Priority</div>
+            <div className="segmented-priority">
+              {(["low", "medium", "high"] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className={`seg-btn ${priority === p ? "active" : ""}`}
+                  onClick={() => setPriority(p)}
+                >
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-            <Tag size={13} style={{ position: "absolute", left: "0.65rem", color: "var(--text-muted)", pointerEvents: "none" }} />
+          <div>
+            <div className="field-label">Category</div>
             <select
-              className="input-text"
-              style={{ padding: "0.4rem 0.8rem 0.4rem 1.9rem", fontSize: "0.8rem", width: "auto" }}
+              className="select-box"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="General">General</option>
               <option value="Engineering">Engineering</option>
-              <option value="Architecture">Architecture</option>
-              <option value="DevOps">DevOps</option>
               <option value="Product">Product</option>
+              <option value="DevOps">DevOps</option>
+              <option value="Design">Design</option>
+              <option value="General">General</option>
             </select>
           </div>
-
-          <input
-            type="date"
-            className="input-text"
-            style={{ padding: "0.4rem 0.75rem", fontSize: "0.8rem", width: "auto" }}
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            title="Optional due date"
-          />
         </div>
-      </div>
-    </form>
+
+        <div>
+          <div className="field-label">Date</div>
+          <select
+            className="select-box"
+            value={dateOption}
+            onChange={(e) => setDateOption(e.target.value)}
+          >
+            <option value="Today">Today</option>
+            <option value="Tomorrow">Tomorrow</option>
+            <option value="Fri, Mar 15">Fri, Mar 15</option>
+            <option value="Mon, Mar 18">Mon, Mar 18</option>
+            <option value="Next Week">Next Week</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          className="btn-add-purple"
+          disabled={!title.trim() || isLoading}
+        >
+          <Plus size={16} strokeWidth={2.5} />
+          <span>Add Task</span>
+        </button>
+      </form>
+    </div>
   );
 };

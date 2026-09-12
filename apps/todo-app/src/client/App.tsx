@@ -4,8 +4,9 @@ import { StatsBar } from "./components/StatsBar.js";
 import { AddTodoForm } from "./components/AddTodoForm.js";
 import { FilterBar } from "./components/FilterBar.js";
 import { TodoItem } from "./components/TodoItem.js";
+import { FocusSnapshot } from "./components/FocusSnapshot.js";
 import { SqlInspector } from "./components/SqlInspector.js";
-import { CheckCircle2, Sparkles } from "lucide-react";
+import { CheckCircle2, Clock, Sparkles, Zap } from "lucide-react";
 import { TodoItem as TodoType, QueryTelemetryItem } from "../server/db.js";
 
 interface AppStats {
@@ -16,6 +17,10 @@ interface AppStats {
 }
 
 export const App: React.FC = () => {
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    return (localStorage.getItem("light-orm-theme") as "light" | "dark") || "light";
+  });
+
   const [todos, setTodos] = useState<TodoType[]>([]);
   const [stats, setStats] = useState<AppStats>({
     total: 0,
@@ -30,9 +35,19 @@ export const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Apply theme to document element
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("light-orm-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3200);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const fetchQueries = async () => {
@@ -43,7 +58,7 @@ export const App: React.FC = () => {
         setQueries(json.queries);
       }
     } catch {
-      // ignore query fetch errors
+      // ignore
     }
   };
 
@@ -121,7 +136,7 @@ export const App: React.FC = () => {
       });
       const json = await res.json();
       if (json.success) {
-        showToast(completed ? "Completed via db.todo.update()" : "Active via db.todo.update()");
+        showToast(completed ? "Completed via db.todo.update()" : "Reopened via db.todo.update()");
         fetchStats();
         fetchQueries();
       }
@@ -187,70 +202,120 @@ export const App: React.FC = () => {
     }
   };
 
+  // Determine dynamic greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   return (
-    <>
-      <div className="bg-grid-overlay" />
-      <div className="app-container">
-        <Header
-          driverName={stats.driver}
-          onRefresh={fetchTodos}
-          onSeedData={handleSeedData}
-          onClearCompleted={handleClearCompleted}
-          isLoading={isLoading}
-        />
+    <div className="app-wrapper">
+      {/* Top Header Navigation */}
+      <Header
+        driverName={stats.driver}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onRefresh={fetchTodos}
+        onSeedData={handleSeedData}
+        onClearCompleted={handleClearCompleted}
+        isLoading={isLoading}
+      />
 
-        {toastMessage && (
-          <div className="toast-container">
-            <CheckCircle2 size={18} color="#34d399" />
-            <span>{toastMessage}</span>
+      {/* Hero Greeting Section */}
+      <section className="hero-section">
+        <div className="greeting-card">
+          <div className="tag-pill">
+            <Sparkles size={12} />
+            <span>A focused workspace</span>
           </div>
-        )}
+          <h2 className="greeting-title">{greeting}, Alex</h2>
+          <p className="greeting-subtext">A calm place to move today's work forward.</p>
+          <div className="focus-count-pill">
+            <Clock size={13} />
+            <span>{stats.active} tasks need your focus</span>
+          </div>
+        </div>
 
-        <StatsBar
-          total={stats.total}
-          completed={stats.completed}
-          active={stats.active}
-        />
+        <div className="focus-artwork-card">
+          <img
+            src="/focus-mode.jpg"
+            alt="3D Focus Artwork"
+            className="focus-artwork-img"
+          />
+          <div className="focus-artwork-badge">
+            <Zap size={11} fill="white" />
+            <span>Focus mode</span>
+          </div>
+        </div>
+      </section>
 
-        <AddTodoForm onAdd={handleAddTodo} isLoading={isLoading} />
+      {/* 4 Bento Metric Cards */}
+      <StatsBar
+        total={stats.total}
+        completed={stats.completed}
+        active={stats.active}
+      />
 
-        <FilterBar
-          status={statusFilter}
-          onStatusChange={setStatusFilter}
-          priority={priorityFilter}
-          onPriorityChange={setPriorityFilter}
-          search={search}
-          onSearchChange={setSearch}
-        />
+      {/* Main 2-Column Grid */}
+      <div className="workspace-grid">
+        {/* Left Column: Form, Filters, Tasks */}
+        <div className="left-feed">
+          <AddTodoForm onAdd={handleAddTodo} isLoading={isLoading} />
 
-        {todos.length === 0 ? (
-          <div className="glass-panel empty-state">
-            <div className="empty-icon">
-              <Sparkles size={28} />
+          <FilterBar
+            status={statusFilter}
+            onStatusChange={setStatusFilter}
+            priority={priorityFilter}
+            onPriorityChange={setPriorityFilter}
+            search={search}
+            onSearchChange={setSearch}
+          />
+
+          <div>
+            <div className="tasks-header">
+              <h3 className="card-heading" style={{ fontSize: "1.05rem" }}>Today's tasks</h3>
+              <span className="tasks-count-tag">{todos.length}</span>
             </div>
-            <div className="empty-title">No tasks found</div>
-            <div className="empty-subtitle">
-              {search || statusFilter !== "all" || priorityFilter !== "all"
-                ? "No tasks match your filter criteria. Try clearing search or filters."
-                : "All caught up! Click 'Seed Demo' above or add a new task to get started."}
-            </div>
-          </div>
-        ) : (
-          <div className="todo-list">
-            {todos.map((todo) => (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                onToggle={handleToggle}
-                onDelete={handleDelete}
-                onUpdateTitle={handleUpdateTitle}
-              />
-            ))}
-          </div>
-        )}
 
-        <SqlInspector queries={queries} />
+            {todos.length === 0 ? (
+              <div className="clean-card" style={{ textAlign: "center", padding: "2.5rem 1.5rem", color: "var(--text-sub)" }}>
+                <Sparkles size={24} style={{ margin: "0 auto 0.5rem auto", color: "var(--purple-primary)" }} />
+                <p style={{ fontWeight: 600, color: "var(--text-main)", marginBottom: "0.25rem" }}>No tasks to show</p>
+                <p style={{ fontSize: "0.85rem" }}>Click "+ Add Task" or "Seed Demo" above to create your tasks.</p>
+              </div>
+            ) : (
+              <div className="tasks-list">
+                {todos.map((todo) => (
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onToggle={handleToggle}
+                    onDelete={handleDelete}
+                    onUpdateTitle={handleUpdateTitle}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Focus Snapshot & SQL Inspector */}
+        <div className="right-sidebar">
+          <FocusSnapshot
+            total={stats.total}
+            completed={stats.completed}
+            active={stats.active}
+          />
+
+          <SqlInspector queries={queries} />
+        </div>
       </div>
-    </>
+
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="toast-bar">
+          <CheckCircle2 size={16} color="#34d399" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+    </div>
   );
 };

@@ -1,8 +1,10 @@
 import React from "react";
-import { Database, RefreshCw, Sparkles, Trash2, Zap } from "lucide-react";
+import { Moon, RefreshCw, Sparkles, Sun, Trash2 } from "lucide-react";
 
 interface HeaderProps {
   driverName: string;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
   onSeedData: () => void;
   onClearCompleted: () => void;
   onRefresh: () => void;
@@ -11,69 +13,65 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   driverName,
+  theme,
+  onToggleTheme,
   onSeedData,
   onClearCompleted,
   onRefresh,
   isLoading,
 }) => {
   const isPostgres = driverName.includes("postgres");
-  const driverLabel = isPostgres ? "Neon Serverless Postgres" : "Memory Postgres Engine";
+  const driverLabel = isPostgres ? "Neon Serverless Postgres" : "In-Memory Engine";
 
   return (
-    <header className="app-header">
-      <div className="header-brand">
-        <div className="brand-icon-wrapper">
-          <div className="brand-icon">
-            <Database size={26} />
-          </div>
-        </div>
+    <header className="top-nav">
+      <div className="brand-section">
+        <div className="brand-pill-bar" />
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <h1 className="brand-title">LightORM Studio</h1>
-            <span className="brand-title-badge">v0.1</span>
-          </div>
-          <div className="brand-subtitle">
-            <span>Powered by @light-orm/core</span>
-            <span>•</span>
-            <div className="driver-badge">
-              <div className="driver-pulse-wrapper">
-                <span className="driver-ping" />
-                <span className="driver-dot" />
-              </div>
-              <Zap size={12} />
-              <span>{driverLabel}</span>
-            </div>
+          <h1 className="brand-title">LightORM Studio</h1>
+          <div className="brand-subline">
+            <span className="neon-dot" />
+            <span>{driverLabel}</span>
           </div>
         </div>
       </div>
 
-      <div className="header-actions">
+      <div className="nav-actions">
         <button
-          className="btn btn-secondary"
+          className="nav-btn"
           onClick={onRefresh}
           disabled={isLoading}
-          title="Refresh tasks & query telemetry"
+          title="Sync with database"
         >
-          <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+          <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
           <span>Sync</span>
         </button>
 
         <button
-          className="btn btn-secondary"
+          className="nav-btn"
           onClick={onSeedData}
           title="Seed realistic demo tasks"
         >
-          <Sparkles size={14} color="#a855f7" />
+          <Sparkles size={13} color="var(--purple-primary)" />
           <span>Seed Demo</span>
         </button>
 
         <button
-          className="btn btn-danger-ghost"
+          className="nav-btn danger"
           onClick={onClearCompleted}
           title="Clear all completed tasks"
         >
-          <Trash2 size={14} />
+          <Trash2 size={13} />
           <span>Clear Done</span>
+        </button>
+
+        <button
+          className="theme-toggle-btn"
+          onClick={onToggleTheme}
+          title={`Switch to ${theme === "light" ? "Dark" : "Light"} Mode`}
+          aria-label="Toggle theme"
+        >
+          {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
         </button>
       </div>
     </header>

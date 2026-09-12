@@ -1,5 +1,5 @@
 import React from "react";
-import { Filter, Search } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 
 interface FilterBarProps {
   status: "all" | "active" | "completed";
@@ -19,54 +19,60 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onSearchChange,
 }) => {
   return (
-    <div className="glass-panel filter-bar">
-      <div className="tabs-group">
+    <div className="toolbar-card">
+      <div className="tab-pill-group">
         <button
-          className={`tab-btn ${status === "all" ? "active" : ""}`}
+          className={`filter-tab ${status === "all" ? "active" : ""}`}
           onClick={() => onStatusChange("all")}
         >
           All Tasks
         </button>
         <button
-          className={`tab-btn ${status === "active" ? "active" : ""}`}
+          className={`filter-tab ${status === "active" ? "active" : ""}`}
           onClick={() => onStatusChange("active")}
         >
           In Progress
         </button>
         <button
-          className={`tab-btn ${status === "completed" ? "active" : ""}`}
+          className={`filter-tab ${status === "completed" ? "active" : ""}`}
           onClick={() => onStatusChange("completed")}
         >
           Completed
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flex: 1, justifyContent: "flex-end" }}>
-        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-          <Filter size={13} style={{ position: "absolute", left: "0.65rem", color: "var(--text-muted)", pointerEvents: "none" }} />
-          <select
-            className="input-text"
-            style={{ width: "auto", padding: "0.45rem 0.8rem 0.45rem 1.8rem", fontSize: "0.825rem" }}
-            value={priority}
-            onChange={(e) => onPriorityChange(e.target.value)}
-          >
-            <option value="all">All Priorities</option>
-            <option value="high">High Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="low">Low Priority</option>
-          </select>
-        </div>
+      <div className="search-controls-row">
+        <select
+          className="select-box"
+          style={{ width: "140px", flexShrink: 0 }}
+          value={priority}
+          onChange={(e) => onPriorityChange(e.target.value)}
+        >
+          <option value="all">All priorities</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
 
-        <div className="search-box">
-          <Search size={14} className="search-icon" />
+        <div className="search-wrap">
+          <Search size={14} className="search-ico" />
           <input
             type="text"
-            className="search-input"
+            className="search-input-field"
             placeholder="Search tasks..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
+
+        <button
+          className="nav-btn"
+          style={{ padding: "0.5rem 0.65rem" }}
+          title="Filter options"
+          aria-label="Filter options"
+        >
+          <SlidersHorizontal size={14} />
+        </button>
       </div>
     </div>
   );
