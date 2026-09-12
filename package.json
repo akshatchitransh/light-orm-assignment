@@ -2,6 +2,7 @@
   "name": "light-orm-monorepo",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Lightweight TypeScript ORM for Serverless SQL Databases with Todo Showcase",
   "workspaces": [
     "packages/*",
